@@ -41,6 +41,26 @@ void retrying_write(const char *const buf, const size_t buf_sz) {
         }
 }
 
+const char *find_in_buf(const char *const buf, const size_t buf_sz,
+                        const char *const substr)
+{
+        size_t looking_for = 0;
+
+        for (size_t i = 0; i < buf_sz; ++i) {
+                char this = substr[looking_for];
+
+                if (this == '\0')
+                        return buf + i;
+
+                if (buf[i] == this)
+                        ++looking_for;
+                else
+                        looking_for = 0;
+        }
+
+        return NULL;
+}
+
 void parse(void)
 {
         char buf[1024];
