@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 
 void exit_on_bad_errno(void)
 {
@@ -39,6 +40,21 @@ void retrying_write(const char *const buf, const size_t buf_sz) {
 
                 written += sz;
         }
+}
+
+struct buf_stream {
+        char *buf;
+        size_t sz;
+};
+
+struct buf_stream buf_stream_next(const struct buf_stream s)
+{
+        return (struct buf_stream) {s.buf + 1, s.sz - 1};
+};
+
+bool buf_stream_eol(const struct buf_stream s)
+{
+        return s.sz == 0;
 }
 
 const char *find_in_buf(const char *const buf, const size_t buf_sz,
