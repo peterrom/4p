@@ -42,36 +42,19 @@ void retrying_write(const char *const buf, const size_t buf_sz) {
         }
 }
 
-struct buf_stream {
-        char *buf;
-        size_t sz;
-};
-
-struct buf_stream buf_stream_next(const struct buf_stream s)
-{
-        return (struct buf_stream) {s.buf + 1, s.sz - 1};
-};
-
-bool buf_stream_eol(const struct buf_stream s)
-{
-        return s.sz == 0;
-}
-
 const char *find_in_buf(const char *const buf, const size_t buf_sz,
                         const char *const substr)
 {
-        size_t looking_for = 0;
+        const char *t = substr;
 
-        for (size_t i = 0; i < buf_sz; ++i) {
-                char this = substr[looking_for];
-
-                if (this == '\0')
-                        return buf + i;
-
-                if (buf[i] == this)
-                        ++looking_for;
-                else
-                        looking_for = 0;
+        for (const char *c = buf; c < buf + buf_sz; ++c) {
+                if (*t == '\0') {
+                        return c;
+                } else if (*c == *t) {
+                        ++t;
+                } else {
+                        t = substr;
+                }
         }
 
         return NULL;
