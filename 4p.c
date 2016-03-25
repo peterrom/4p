@@ -52,6 +52,8 @@ const char *find_in_buf(const char *const buf, const size_t buf_sz,
                         return c;
                 } else if (*c == *t) {
                         ++t;
+                } else if (*c == *substr) {
+                        t = substr + 1;
                 } else {
                         t = substr;
                 }
