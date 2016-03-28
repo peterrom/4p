@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2015 Peter Román
+# Copyright 2015, 2016 Peter Román
 # This file is part of 4p which is licensed under GNU GPL v3.
 # See the file named LICENSE for details.
 
