@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # Copyright 2015 Peter Román
 # This file is part of 4p which is licensed under GNU GPL v3.
