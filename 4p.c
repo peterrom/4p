@@ -1,3 +1,9 @@
+/* Copyright 2016 Peter Román
+   This file is part of 4p which is licensed under GNU GPL v3.
+   See the file named LICENSE for details.
+
+   This file contains extremely crude prototype code. */
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
