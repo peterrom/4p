@@ -51,11 +51,13 @@ void retrying_write(const char *const buf, const size_t buf_sz) {
 const char *find_in_buf(const char *const buf, const size_t buf_sz,
                         const char *const substr)
 {
+        const char *const end = buf + buf_sz;
+        const char *c = buf;
         const char *t = substr;
 
-        for (const char *c = buf; c < buf + buf_sz; ++c) {
+        for (; c != end; ++c) {
                 if (*t == '\0') {
-                        return c;
+                        break;
                 } else if (*c == *t) {
                         ++t;
                 } else if (*c == *substr) {
@@ -65,7 +67,7 @@ const char *find_in_buf(const char *const buf, const size_t buf_sz,
                 }
         }
 
-        return NULL;
+        return c;
 }
 
 void parse(void)
