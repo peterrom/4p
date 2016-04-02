@@ -68,6 +68,13 @@ const char *find_in_buf(const char *const buf, const size_t buf_sz,
         return c;
 }
 
+const char *handle_text(const char *const beg, const char *const end)
+{
+        const char *text_end = find_in_buf(beg, end - beg, "/*$");
+        retrying_write(beg, text_end - beg);
+        return text_end;
+}
+
 void parse(void)
 {
         char buf[1024];
