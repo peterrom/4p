@@ -55,7 +55,7 @@ const char *find_in_buf(const char *const buf, const size_t buf_sz,
 
         for (; c != end; ++c) {
                 if (*t == '\0') {
-                        break;
+                        return c - strlen(substr);
                 } else if (*c == *t) {
                         ++t;
                 } else if (*c == *substr) {
