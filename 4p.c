@@ -77,11 +77,11 @@ const char *handle_text(const char *const beg, const char *const end)
 
 void parse(void)
 {
-        char buf[1024];
-        size_t sz;
+        char buf[16];
+        const char *end = buf + sizeof(buf);
 
-        while ((sz = retrying_read(buf, sizeof(buf)))) {
-                retrying_write(buf, sz);
+        while ((end = buf + retrying_read(buf, sizeof(buf))) > buf) {
+                handle_text(buf, end);
         }
 }
 
