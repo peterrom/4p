@@ -34,7 +34,7 @@ void retrying_write(const char *const buf, const size_t buf_sz) {
         size_t written = 0;
 
         while (written < buf_sz) {
-                ssize_t sz = write(
+                const ssize_t sz = write(
                         STDOUT_FILENO, buf + written, buf_sz - written);
 
                 if (sz == -1) {
