@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 # Copyright 2016 Peter Román
 # This file is part of 4p which is licensed under GNU GPL v3.
