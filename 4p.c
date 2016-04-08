@@ -9,14 +9,19 @@
 #include <string.h>
 #include <stdbool.h>
 
+void exit_with_errno(void)
+{
+        printf("%s\n", strerror(errno));
+        exit(1);
+}
+
 void exit_on_bad_errno(void)
 {
         switch (errno) {
         case EAGAIN: // == EWOULDBLOCK
                 break;
         default:
-                printf("%s\n", strerror(errno));
-                exit(1);
+                exit_with_errno();
         }
 }
 
