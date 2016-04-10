@@ -2,6 +2,7 @@
    This file is part of 4p which is licensed under GNU GPL v3.
    See the file named LICENSE for details. */
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +79,34 @@ const char *handle_text(const char *const beg, const char *const end)
         const char *text_end = find_in_buf(beg, end - beg, "/*$");
         retrying_write(beg, text_end - beg);
         return text_end;
+}
+
+int bash(void)
+{
+        int pipefd[2];
+        pid_t pid;
+
+        if (pipe(pipefd) == -1) {
+                exit_with_errno();
+        }
+
+        if ((pid = fork()) == -1) {
+                exit_with_errno();
+        }
+
+        if (pid != 0) {
+                close(pipefd[1]);
+                dup2(pipefd[0], STDIN_FILENO);
+
+                execve("/bin/bash",
+                       (char *const[]) {"/bin/bash", NULL},
+                       NULL);
+
+                exit_with_errno();
+        }
+
+        close(pipefd[0]);
+        return pipefd[1];
 }
 
 void parse(void)
