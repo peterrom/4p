@@ -112,10 +112,12 @@ int bash(void)
 void parse(void)
 {
         char buf[16];
+        char *beg = buf;
         const char *end = buf + sizeof(buf);
 
-        while ((end = buf + retrying_read(buf, sizeof(buf))) > buf) {
-                handle_text(buf, end);
+        while ((end = beg + retrying_read(beg, end - beg)) > beg) {
+                beg = handle_text(beg, end);
+
         }
 }
 
