@@ -36,12 +36,11 @@ size_t retrying_read(char *const buf, const size_t buf_sz)
         return (size_t) sz;
 }
 
-void retrying_write(const char *const buf, const size_t buf_sz) {
+void retrying_write(const int fd, const char *const buf, const size_t buf_sz) {
         size_t written = 0;
 
         while (written < buf_sz) {
-                const ssize_t sz = write(
-                        STDOUT_FILENO, buf + written, buf_sz - written);
+                const ssize_t sz = write(fd, buf + written, buf_sz - written);
 
                 if (sz == -1) {
                         exit_on_bad_errno();
@@ -77,7 +76,7 @@ const char *find_in_buf(const char *const buf, const size_t buf_sz,
 const char *handle_text(const char *const beg, const char *const end)
 {
         const char *text_end = find_in_buf(beg, end - beg, "/*$");
-        retrying_write(beg, text_end - beg);
+        retrying_write(STDOUT_FILENO, beg, text_end - beg);
         return text_end;
 }
 
