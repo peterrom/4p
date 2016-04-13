@@ -115,8 +115,7 @@ void parse(void)
         const char *end = buf + sizeof(buf);
 
         while ((end = beg + retrying_read(beg, end - beg)) > beg) {
-                beg = handle_text(beg, end);
-
+                handle_text(beg, end);
         }
 }
 
