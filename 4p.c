@@ -108,14 +108,36 @@ int bash(void)
         return pipefd[1];
 }
 
+#define FSM
+#define STATE(name) fsm_ ## name:
+#define NEXTSTATE(name) goto fsm_ ## name
+
 void parse(void)
 {
         char buf[16];
         char *beg = buf;
         const char *end = buf + sizeof(buf);
 
-        while ((end = beg + retrying_read(beg, end - beg)) > beg) {
-                handle_text(beg, end);
+        FSM {
+                STATE(parsing_text) {
+                        char *pos;
+                        for (pos = beg; pos < end && *pos != '/'; ++pos);
+                        retrying_write(STDOUT_FILENO, beg, end - pos);
+
+                        if (pos == end)
+                                NEXTSTATE(empty_buf_in_text);
+                        else
+                                NEXTSTATE(cmd_start);
+                }
+
+                STATE(empty_buf_in_text) {
+                        // fill buf
+                        NEXTSTATE(parsing_text);
+                }
+
+                STATE(cmd_start) {
+                        NEXTSTATE(parsing_cmd);
+                }
         }
 }
 
