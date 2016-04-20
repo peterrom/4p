@@ -51,35 +51,6 @@ void retrying_write(const int fd, const char *const buf, const size_t buf_sz) {
         }
 }
 
-const char *find_in_buf(const char *const buf, const size_t buf_sz,
-                        const char *const substr)
-{
-        const char *const end = buf + buf_sz;
-        const char *c = buf;
-        const char *t = substr;
-
-        for (; c != end; ++c) {
-                if (*t == '\0') {
-                        return c - strlen(substr);
-                } else if (*c == *t) {
-                        ++t;
-                } else if (*c == *substr) {
-                        t = substr + 1;
-                } else {
-                        t = substr;
-                }
-        }
-
-        return c;
-}
-
-const char *handle_text(const char *const beg, const char *const end)
-{
-        const char *text_end = find_in_buf(beg, end - beg, "/*$");
-        retrying_write(STDOUT_FILENO, beg, text_end - beg);
-        return text_end;
-}
-
 int bash(void)
 {
         int pipefd[2];
@@ -108,41 +79,33 @@ int bash(void)
         return pipefd[1];
 }
 
-#define FSM
-#define STATE(name) fsm_ ## name:
-#define NEXTSTATE(name) goto fsm_ ## name
+struct buffer {
+        char data[16];
+        char *pos;
+};
 
-void parse(void)
+void buffer_init(struct buffer *buf)
 {
-        char buf[16];
-        char *beg = buf;
-        const char *end = buf + sizeof(buf);
+        buf->pos = buf->data;
+}
 
-        FSM {
-                STATE(parsing_text) {
-                        char *pos;
-                        for (pos = beg; pos < end && *pos != '/'; ++pos);
-                        retrying_write(STDOUT_FILENO, beg, end - pos);
+char *buffer_end(struct buffer *buf)
+{
+        return buf->data + sizeof(buf->data);
+}
 
-                        if (pos == end)
-                                NEXTSTATE(empty_buf_in_text);
-                        else
-                                NEXTSTATE(cmd_start);
-                }
+void buffer_replenish(struct buffer *buf)
+{
+        memmove(buf->data, buf->pos, buffer_end(buf) - buf->pos);
+        buf->pos = buf->data;
+}
 
-                STATE(empty_buf_in_text) {
-                        // fill buf
-                        NEXTSTATE(parsing_text);
-                }
-
-                STATE(cmd_start) {
-                        NEXTSTATE(parsing_cmd);
-                }
-        }
+size_t buffer_available(struct buffer *buf)
+{
+        return buffer_end(buf) - buf->pos;
 }
 
 int main(void)
 {
-        parse();
         return 0;
 }
