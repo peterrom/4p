@@ -82,27 +82,30 @@ int bash(void)
 struct buffer {
         char data[16];
         char *pos;
+        char *end;
 };
 
 void buffer_init(struct buffer *buf)
 {
         buf->pos = buf->data;
-}
-
-char *buffer_end(struct buffer *buf)
-{
-        return buf->data + sizeof(buf->data);
-}
-
-void buffer_replenish(struct buffer *buf)
-{
-        memmove(buf->data, buf->pos, buffer_end(buf) - buf->pos);
-        buf->pos = buf->data;
+        buf->end = buf->data + sizeof(buf->data);
 }
 
 size_t buffer_available(struct buffer *buf)
 {
-        return buffer_end(buf) - buf->pos;
+        return buf->end - buf->pos;
+}
+
+void buffer_replenish(struct buffer *buf)
+{
+        const size_t save_sz = buffer_available(buf);
+        memmove(buf->data, buf->pos, save_sz);
+
+        const size_t read_sz = retrying_read(buf->data + save_sz,
+                                             sizeof(buf->data) - save_sz);
+
+        buf->pos = buf->data;
+        buf->end = buf->data + save_sz + read_sz;
 }
 
 int main(void)
