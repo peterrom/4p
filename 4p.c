@@ -108,7 +108,20 @@ void buffer_replenish(struct buffer *buf)
         buf->end = buf->data + save_sz + read_sz;
 }
 
+#define FSM
+#define STATE(x) fsm_ ## x:
+#define NEXTSTATE(x) goto fsm_ ## x
+
 int main(void)
 {
+        struct buffer buf;
+        buffer_init(&buf);
+
+        FSM {
+                STATE(other) {
+
+                }
+        }
+
         return 0;
 }
