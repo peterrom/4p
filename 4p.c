@@ -96,7 +96,7 @@ size_t buffer_available(struct buffer *buf)
         return buf->end - buf->pos;
 }
 
-void buffer_replenish(struct buffer *buf)
+bool buffer_replenish(struct buffer *buf)
 {
         const size_t save_sz = buffer_available(buf);
         memmove(buf->data, buf->pos, save_sz);
@@ -106,20 +106,30 @@ void buffer_replenish(struct buffer *buf)
 
         buf->pos = buf->data;
         buf->end = buf->data + save_sz + read_sz;
-}
 
-#define FSM
-#define STATE(x) fsm_ ## x:
-#define NEXTSTATE(x) goto fsm_ ## x
+        return buf->end > buf->pos;
+}
 
 int main(void)
 {
         struct buffer buf;
         buffer_init(&buf);
 
-        FSM {
-                STATE(other) {
+        const char *delimiters[] = {"/*$ ", " $*/"};
+        int dindex = 0;
+        const char *looking_for = delimiters[dindex];
 
+        while (buffer_replenish(&buf)) {
+                for (; buf.pos < buf.end; ++buf.pos) {
+                        if (*buf.pos == *looking_for)
+                                ++looking_for;
+                        else
+                                looking_for = delimiters[dindex];
+
+                        if (*looking_for == '\0') {
+                                dindex = (dindex + 1) % 2;
+                                looking_for = delimiters[dindex];
+                        }
                 }
         }
 
