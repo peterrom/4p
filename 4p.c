@@ -110,6 +110,12 @@ bool buffer_replenish(struct buffer *buf)
         return buf->end > buf->pos;
 }
 
+bool matches(const char *a, const char *b, size_t n)
+{
+        for (; n && *a == *b; --n, ++a, ++b);
+        return !n;
+}
+
 int main(void)
 {
         struct buffer buf;
