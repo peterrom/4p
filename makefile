@@ -4,3 +4,6 @@
 .PHONY: check
 check: test4p.py 4p
 	./$<
+
+.PHONY: clean
+	rm -f 4p
