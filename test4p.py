@@ -25,6 +25,14 @@ def test_no_cmd(data):
     assert parse(data) == data
 
 
+@given(text())
+def test_single_cmd(data):
+    assume(u' $*/' not in data)
+    assume(u'EOF' not in data)
+
+    assert parse(u'/*$ cat <<EOF\n{}\nEOF $*/') == u'{}\n'.format(data)
+
+
 if __name__ == '__main__':
     import sys
 
