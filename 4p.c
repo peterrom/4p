@@ -118,7 +118,7 @@ bool buffer_replenish(struct buffer *buf)
         buf->pos = buf->data;
         buf->end = buf->data + save_sz + read_sz;
 
-        return buf->end > buf->pos;
+        return read_sz;
 }
 
 bool matches(const char *a, const char *b, size_t n)
@@ -170,6 +170,8 @@ int main(void)
                         skip_and_switch = 0;
                 }
         }
+
+        retrying_write(stream, buf.data, buffer_available(&buf));
 
         return 0;
 }
