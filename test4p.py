@@ -12,10 +12,10 @@ from hypothesis.strategies import text
 
 
 def parse(data):
-    output, _ = Popen(['./4p'], stdin=PIPE, stdout=PIPE) \
-        .communicate(data.encode('utf-8'))
+    output, _ = Popen([u'./4p'], stdin=PIPE, stdout=PIPE) \
+        .communicate(data.encode(u'utf-8'))
 
-    return output.decode('utf-8')
+    return output.decode(u'utf-8')
 
 
 @given(text())
@@ -38,22 +38,22 @@ if __name__ == '__main__':
 
     def is_test(v):
         try:
-            return v.func_name.startswith('test_')
+            return v.func_name.startswith(u'test_')
         except AttributeError:
             return False
 
     tests = (v for v in globals().copy().itervalues() if is_test(v))
 
     for test in tests:
-        print test.func_name, '...',
+        print test.func_name, u'...',
 
         try:
             test()
         except AssertionError:
-            print 'Fail'
+            print u'Fail'
         except:
-            print 'Error'
+            print u'Error'
         else:
-            print 'Pass'
+            print u'Pass'
         finally:
             sys.stdout.flush()
