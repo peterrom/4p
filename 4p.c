@@ -51,7 +51,7 @@ void retrying_write(const int fd, const char *const buf, const size_t buf_sz) {
         }
 }
 
-int bash(void)
+int bash_stream(void)
 {
         int pipefd[2];
         pid_t pid;
@@ -79,6 +79,17 @@ int bash(void)
         return pipefd[1];
 }
 
+int stdout_stream(void)
+{
+        return STDOUT_FILENO;
+}
+
+void close_stream(int fd)
+{
+        if (fd != STDOUT_FILENO)
+                close(fd);
+}
+
 struct buffer {
         char data[16];
         char *pos;
@@ -87,8 +98,8 @@ struct buffer {
 
 void buffer_init(struct buffer *buf)
 {
-        buf->pos = buf->data;
         buf->end = buf->data + sizeof(buf->data);
+        buf->pos = buf->end;
 }
 
 size_t buffer_available(struct buffer *buf)
@@ -121,21 +132,42 @@ int main(void)
         struct buffer buf;
         buffer_init(&buf);
 
+        int (*streams[])(void) = {stdout_stream, bash_stream};
         const char *delimiters[] = {"/*$ ", " $*/"};
+
         int dindex = 0;
+
+        int stream = streams[dindex]();
         const char *looking_for = delimiters[dindex];
+
+        size_t skip_and_switch = 0;
 
         while (buffer_replenish(&buf)) {
                 for (; buf.pos < buf.end; ++buf.pos) {
-                        if (*buf.pos == *looking_for)
-                                ++looking_for;
-                        else
-                                looking_for = delimiters[dindex];
+                        if (*buf.pos == *looking_for) {
+                                const size_t sz = strlen(looking_for);
 
-                        if (*looking_for == '\0') {
-                                dindex = (dindex + 1) % 2;
-                                looking_for = delimiters[dindex];
+                                if (buffer_available(&buf) < sz)
+                                        break;
+                                else if (matches(buf.pos, looking_for, sz)) {
+                                        skip_and_switch = sz;
+                                        break;
+                                }
                         }
+                }
+
+                retrying_write(stream, buf.data, buf.pos - buf.data);
+
+                if (skip_and_switch) {
+                        buf.pos += skip_and_switch;
+
+                        close_stream(stream);
+
+                        dindex ^= 1;
+                        stream = streams[dindex]();
+                        looking_for = delimiters[dindex];
+
+                        skip_and_switch = 0;
                 }
         }
 
