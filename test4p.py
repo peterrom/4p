@@ -30,7 +30,8 @@ def test_single_cmd(data):
     assume(u' $*/' not in data)
     assume(u'EOF' not in data)
 
-    assert parse(u'/*$ cat <<EOF\n{}\nEOF $*/') == u'{}\n'.format(data)
+    assert \
+        parse(u'/*$ cat <<EOF\n{}EOF $*/'.format(data)) == u'{}'.format(data)
 
 
 if __name__ == '__main__':
