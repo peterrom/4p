@@ -2,5 +2,5 @@
 	c99 -g 4p.c -o 4p
 
 .PHONY: check
-check: 4p
-	./test4p.py
+check: test4p.py 4p
+	./$<
