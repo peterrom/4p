@@ -6,4 +6,5 @@ check: test4p.py 4p
 	./$<
 
 .PHONY: clean
+clean:
 	rm -f 4p
