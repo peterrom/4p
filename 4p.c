@@ -64,7 +64,7 @@ int bash_stream(void)
                 exit_with_errno();
         }
 
-        if (pid != 0) {
+        if (pid == 0) {
                 close(pipefd[1]);
                 dup2(pipefd[0], STDIN_FILENO);
 
