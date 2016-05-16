@@ -105,8 +105,8 @@ struct buffer {
 
 void buffer_init(struct buffer *buf)
 {
-        buf->end = buf->data + sizeof(buf->data);
-        buf->pos = buf->end;
+        buf->end = buf->data;
+        buf->pos = buf->data;
 }
 
 size_t buffer_available(struct buffer *buf)
