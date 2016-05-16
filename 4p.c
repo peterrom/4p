@@ -134,6 +134,23 @@ bool matches(const char *a, const char *b, size_t n)
         return !n;
 }
 
+ssize_t parse(struct buffer *buf, const char *const looking_for)
+{
+        for (; buf->pos < buf->end; ++buf->pos) {
+                if (*buf->pos == *looking_for) {
+                        const size_t sz = strlen(looking_for);
+
+                        if (buffer_available(buf) < sz) {
+                                return -1;
+                        } else if (matches(buf->pos, looking_for, sz)) {
+                                return sz;
+                        }
+                }
+        }
+
+        return 0;
+}
+
 int main(void)
 {
         struct buffer buf;
@@ -147,26 +164,26 @@ int main(void)
         int stream = streams[dindex]();
         const char *looking_for = delimiters[dindex];
 
-        size_t skip_and_switch = 0;
-
-        while (buffer_replenish(&buf)) {
-                for (; buf.pos < buf.end; ++buf.pos) {
-                        if (*buf.pos == *looking_for) {
-                                const size_t sz = strlen(looking_for);
-
-                                if (buffer_available(&buf) < sz)
-                                        break;
-                                else if (matches(buf.pos, looking_for, sz)) {
-                                        skip_and_switch = sz;
-                                        break;
-                                }
-                        }
-                }
+        for (;;) {
+                const ssize_t res = parse(&buf, looking_for);
 
                 retrying_write(stream, buf.data, buf.pos - buf.data);
 
-                if (skip_and_switch) {
-                        buf.pos += skip_and_switch;
+                switch (res) {
+                case -1:
+                        if (buffer_replenish(&buf) == 0) {
+                                retrying_write(stream, buf.data, buffer_available(&buf));
+                                exit(0);
+                        }
+
+                        break;
+                case 0:
+                        if (buffer_replenish(&buf) == 0)
+                                exit(0);
+
+                        break;
+                default:
+                        buf.pos += res;
 
                         close_stream(stream);
 
@@ -174,11 +191,10 @@ int main(void)
                         stream = streams[dindex]();
                         looking_for = delimiters[dindex];
 
-                        skip_and_switch = 0;
+                        (void) buffer_replenish(&buf);
+                        break;
                 }
         }
-
-        retrying_write(stream, buf.data, buffer_available(&buf));
 
         return 0;
 }
