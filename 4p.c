@@ -3,6 +3,7 @@
    See the file named LICENSE for details. */
 
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,8 +87,14 @@ int stdout_stream(void)
 
 void close_stream(int fd)
 {
-        if (fd != STDOUT_FILENO)
+        if (fd != STDOUT_FILENO) {
                 close(fd);
+
+                int status;
+                do {
+                        wait(&status);
+                } while (!WIFEXITED(status));
+        }
 }
 
 struct buffer {
